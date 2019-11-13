@@ -47,7 +47,7 @@
           p.gender = gender;
           p.fname = fname;
           p.lname = lname;
-          p.sbp = {value:systolic};
+          p.systolic = {value:systolic};
 
           if (typeof systolicbp != 'undefined')  {
             p.systolicbp = systolicbp;
@@ -121,7 +121,7 @@
     $('#lname').html(p.lname);
     $('#gender').html(p.gender);
     $('#birthdate').html(p.birthdate);
-    $('#systolic').html(p.sbp);
+    $('#systolic').html(p.systolic);
     $('#systolicbp').html(p.systolicbp);
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
