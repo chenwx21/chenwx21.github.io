@@ -3,99 +3,124 @@
   <head>
     <meta http-equiv='X-UA-Compatible' content='IE=edge' />
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-    <title>Example-SMART-App</title>
-
-    <link rel='stylesheet' type='text/css' href='./src/css/example-smart-app.css'>
-    <!--
-      Temporarily disable cerner-smart-embeddable-lib
-      <link rel='stylesheet' type='text/css' href='./lib/css/cerner-smart-embeddable-lib-1.0.0.min.css'>
-    -->
-  </head>
-  <body>
-    <div id='errors'>
+    <title>Query Health Data</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" language="javascript"  src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src='./lib/fhir-client.js'></script>
+    <script src="js/query.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="index.html">Patient-Generated Health Data Platform</a>
+        </div>
     </div>
-    <div id="loading" class="spinner">
-      <div class="bounce1"></div>
-      <div class="bounce2"></div>
-      <div class="bounce3"></div>
+</nav>
+
+<div class="row" id='loading'>
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">Query Constraints</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="start">Start Time:</label>
+                    <input type="text" class="form-control" id="start" placeholder="mm/dd/yyyy">
+                </div>
+                <div class="form-group">
+                    <label for="end">End Time:</label>
+                    <input type="text" class="form-control" id="end" placeholder="mm/dd/yyyy">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block" onClick="checkInputValidation(); extractData().then(function(p) {drawVisualization(p);});">Submit</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id='holder' >
-      <h2>Example-SMART-App</h2>
+</div>
 
-      <h2>Patient Resource</h2>
-      <table>
-        <tr>
-          <th>First Name:</th>
-          <td id='fname'></td>
-        </tr>
-        <tr>
-          <th>Last Name:</th>
-          <td id='lname'></td>
-        </tr>
-        <tr>
-          <th>Gender:</th>
-          <td id='gender'></td>
-        </tr>
-        <tr>
-          <th>Date of Birth:</th>
-          <td id='birthdate'></td>
-        </tr>
-      </table>
-      <h2>Observation Resource</h2>
-      <table>
-        <tr>
-          <th>Height:</th>
-          <td id='height'></td>
-        </tr>
-        <tr>
-          <th>Systolic Blood Pressure:</th>
-          <td id='systolicbp'></td>
 
-        </tr>
+    <div id='holder' style="display:none">
+      <!-- toggle(holder) -->
+      <h2>Patient-Generated-Health-Data APP</h2>
+
+      <h2>Heart Rate Search Results</h2>
+
+      <table id='query_table' border='1'>
         <tr>
-          <th>Diastolic Blood Pressure:</th>
-          <td id='diastolicbp'></td>
+          <th>Heart Rate: (/min)</th>
+          <td id='heartRate'></td>
         </tr>
-        <tr>
-          <th>LDL:</th>
-          <td id='ldl'></td>
-        </tr>
-        <tr>
-          <th>HDL:</th>
-          <td id='hdl'></td>
-        </tr>
+
       </table>
     </div>
-    <!-- Required JS files to enable this page to embed within an MPage -->
-    <!--
-      Temporarily disable cerner-smart-embeddable-lib
-      <script src='https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js'></script>
-      <script src='./lib/js/cerner-smart-embeddable-lib-1.0.0.min.js'></script>
-    -->
 
-    <!-- Application-level javascript-->
-    <script src='./src/js/example-smart-app.js'></script>
 
-    <!-- FHIR Client JS Library -->
-    <script src='./lib/js/fhir-client-v0.1.12.js'></script>
+<div class="img-fluid">
+	    <div class="footer-images">
+			<img class="img-responsive mx-auto d-block" src="img/logo.png" alt="logo"  style="position:absolute;bottom:0;" >
+		</div>
+</div>
 
-    <!-- Prevent session bleed caused by single threaded embedded browser and sessionStorage API -->
-    <!-- https://github.com/cerner/fhir-client-cerner-additions -->
-    <script src='./lib/js/fhir-client-cerner-additions-1.0.0.js'></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script>
-      extractData().then(
-        //Display Patient Demographics and Observations if extractData was success
-        function(p) {
-          drawVisualization(p);
-        },
+<script type="text/javascript">
 
-        //Display 'Failed to call FHIR Service' if extractData failed
-        function() {
-          $('#loading').hide();
-          $('#errors').html('<p> Failed to call FHIR Service </p>');
-        }
-      );
-    </script>
+  function isValidDate(dateString)
+  {
+      // First check for the pattern
+      if(!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString))
+          return false;
+
+      // Parse the date parts to integers
+      var parts = dateString.split("/");
+      var year = parseInt(parts[2], 10);
+      var month = parseInt(parts[0], 10);
+      var day = parseInt(parts[1], 10);
+
+      // get current date
+      var today = new Date();
+      var currentYear = today.getFullYear();
+      var currentMonth = today.getMonth() + 1;
+      var currentDay = today.getDate();
+
+      // Check the ranges of month and year
+      if(year < 1000 || year > currentYear || month == 0 || month > 12)
+          return false;
+
+      var monthDays = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+
+      // Adjust for leap years
+      if(year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
+          monthDays[1] = 29;
+
+      // Check the range of the day
+      return day > 0 && day <= monthDays[month - 1];
+  };
+
+  function checkInputValidation() {
+    var startDay = $('#start').val();
+
+    var endDay =$('#end').val();
+
+    // the start date must be a valid date
+    if (!isValidDate(startDay)){
+       window.alert("Start Date is not valid");}
+
+    // the end date must be a valid date
+    else if (!isValidDate(endDay)){
+       window.alert("End Date is not valid");}
+
+    // the start date must be no later than end date
+    else if (Date.parse(startDay) > Date.parse(endDay)){
+      window.alert("End Date should no earlier than start Date");}
+  }
+
+
+
+</script>
   </body>
 </html>
