@@ -36,7 +36,7 @@
             lname = patient.name[0].family.join(' ');
           }
 
-          var systolic = byCodes("8480-6");
+          var systolic = byCodes("8867-4");
           var systolicbp = getBloodPressureValue(byCodes('55284-4'),'8480-6');
           var diastolicbp = getBloodPressureValue(byCodes('55284-4'),'8462-4');
           var hdl = byCodes('2085-9');
@@ -121,7 +121,7 @@
     $('#lname').html(p.lname);
     $('#gender').html(p.gender);
     $('#birthdate').html(p.birthdate);
-    $('#systolic').html(p.height);
+    $('#systolic').html(p.systolic);
     $('#systolicbp').html(p.systolicbp);
     $('#diastolicbp').html(p.diastolicbp);
     $('#ldl').html(p.ldl);
